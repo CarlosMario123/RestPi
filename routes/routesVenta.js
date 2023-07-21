@@ -48,66 +48,60 @@ routesVenta.get("/Productos/:year/:month", (req, res) => {
   });
 });
 
-routesVenta.post("/", (req, res) => {
-  req.getConnection((err, conn) => {
-    if (err) return res.send(err);
+routesVenta.post("/", async (req, res) => {
+  try {
+    const conn = await req.getConnection();
 
-    const ventaData = req.body; // Datos de la venta proporcionados en el cuerpo de la solicitud
-    const idProducto = ventaData.id_Producto; // ID_Producto vendido
-    let Cantidad_Disponible = ventaData.Cantidad_Disponible; // Can disponible de la tabla venta
+    const ventaData = req.body;
+    const idProducto = ventaData.id_Producto;
 
-    // Verificar si el producto existe en la tabla Producto
-    conn.query(
-      "SELECT Nombre FROM Producto WHERE Nombre = ?",
-      [idProducto],
-      (err, result) => {
-        if (err) return res.send(err);
-
-        if (result.length === 0) {
-          // El producto no existe en la tabla Producto
-          return res.status(404).json({ error: "Producto no encontrado" });
-        }
-
-        // Realizar la inserción en la tabla Venta
-        conn.query("INSERT INTO Venta SET ?", [ventaData], (err, result) => {
-          if (err) return res.send(err);
-
-          // Actualizar la cantidad disponible en la tabla Producto
-          conn.query(
-            "UPDATE Producto SET Cantidad_Disponible = Cantidad_Disponible - ? WHERE Nombre = ?",
-            [ventaData.Cantidad_Vendida, idProducto],
-            (err, result) => {
-              if (err) return res.send(err);
-
-              conn.query(
-                "SELECT Cantidad_Disponible FROM Producto",
-                (err, rows) => {
-                  if (err) return res.send(err);
-
-                  if ((Cantidad_Disponible = 0)) {
-                    conn.query(
-                      "DELETE FROM Producto WHERE Cantidad_Disponible = 0",
-                      (err, rows) => {
-                        
-                        if (err) return res.send(err);
-
-                        res.json(rows);
-                      }
-                    );
-                  }
-
-                  res.json(rows);
-                }
-              );
-
-              res.json(result);
-            }
-          );
-        });
-      }
+    const result = await conn.query(
+      "SELECT id_Producto, Cantidad_Disponible FROM Producto WHERE id_Producto = ?",
+      [idProducto]
     );
-  });
+
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    const cantidadVendida = ventaData.Cantidad_Vendida;
+    const cantidadDisponible = result[0].Cantidad_Disponible;
+
+    if (cantidadDisponible < cantidadVendida) {
+      return res.status(400).json({ error: "No hay suficiente cantidad disponible para vender" });
+    }
+
+    const nuevaCantidadDisponible = cantidadDisponible - cantidadVendida;
+
+    await conn.beginTransaction();
+
+    try {
+      await conn.query("UPDATE Producto SET Cantidad_Disponible = ? WHERE id_Producto = ?", [
+        nuevaCantidadDisponible,
+        idProducto,
+      ]);
+
+      await conn.query("INSERT INTO Venta SET ?", [ventaData]);
+
+      if (nuevaCantidadDisponible <= 0) {
+        await conn.query("DELETE FROM Producto WHERE id_Producto = ?", [idProducto]);
+      }
+
+      await conn.commit();
+      res.json({ message: "Venta realizada y producto eliminado si Cantidad_Disponible <= 0" });
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    }
+  } catch (err) {
+    res.send(err);
+  }
 });
+
+
+
+
+
 
 routesVenta.delete("/:id", (req, res) => {
   req.getConnection((err, conn) => {

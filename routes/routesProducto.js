@@ -32,12 +32,12 @@ routesProducto.post("/", (req, res) => {
     if (err) return res.send(err);
 
     const productoData = req.body;
-    const idProducto = productoData.id_Producto;
+    const nombreProducto = productoData.Nombre;
     const cantidadIntroducida = productoData.Cantidad_Disponible;
 
     conn.query(
-      "SELECT id_Producto, Cantidad_Disponible FROM Producto WHERE id_Producto = ?",
-      [idProducto],
+      "SELECT id_Producto, Cantidad_Disponible FROM Producto WHERE Nombre = ?",
+      [nombreProducto],
       (err, result) => {
         if (err) return res.send(err);
 
@@ -54,6 +54,7 @@ routesProducto.post("/", (req, res) => {
           );
         } else {
           // El producto existe, se realiza la actualización de la cantidad disponible
+          const idProducto = result[0].id_Producto;
           const cantidadActual = result[0].Cantidad_Disponible;
           const nuevaCantidad = cantidadActual + cantidadIntroducida;
 
@@ -71,6 +72,7 @@ routesProducto.post("/", (req, res) => {
     );
   });
 });
+
 
 
 routesProducto.delete("/:id", (req, res) => {
