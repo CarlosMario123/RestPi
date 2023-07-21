@@ -27,6 +27,21 @@ routesProducto.get("/:nombre", (req, res) => {
   });
 });
 
+
+routesProducto.get("/id/:id", (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+    conn.query(
+      "SELECT Cantidad_Disponible FROM Producto WHERE id_Producto  = ?",
+      [req.params.id],
+      (err, rows) => {
+        if (err) return res.send(err);
+        res.json(rows);
+      }
+    );
+  });
+});
+
 routesProducto.post("/", (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
