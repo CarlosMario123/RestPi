@@ -6,6 +6,7 @@ const {
   agregarVenta,
   eliminarVenta,
   actualizarVenta,
+  mejorCliente
 } = require("../controllers/ventaController");
 
 const routesVenta = express.Router();
@@ -16,7 +17,7 @@ routesVenta.get("/:month/:year", productoVendido);
 
 routesVenta.get("/Productos/:year/:month", productoFecha);
 
-routesVenta.get('mejorCliente',)
+routesVenta.get('/mejorCliente',mejorCliente)
 
 routesVenta.post("/", agregarVenta);
 

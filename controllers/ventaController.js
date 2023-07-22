@@ -15,10 +15,10 @@ const mejorCliente = (req, res) => {
     if (err) return res.send(err);
 
     conn.query(
-     `SELECT id_Cliente, SUM(Cantidad_Vendida) AS Total_Ventas
-      FROM Venta
-      GROUP BY id_Cliente
-      ORDER BY Total_Ventas DESC;`,
+     `SELECT Nombre, SUM(Cantidad_Vendida) AS Total_Ventas
+     FROM Venta natural join Cliente
+     GROUP BY id_Cliente 
+     ORDER BY Total_Ventas DESC;`,
       (err, rows) => {
         if (err) return res.send(err);
 

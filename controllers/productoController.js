@@ -47,7 +47,7 @@ const agregarProducto = (req, res) => {
     const cantidadIntroducida = productoData.Cantidad_Disponible;
 
     conn.query(
-      "SELECT id_Producto, Cantidad_Disponible, Estado FROM Producto WHERE Nombre = ?",
+      "SELECT id_Producto, Cantidad_Disponible, Estado FROM Producto WHERE id_Producto = ?",
       [nombreProducto],
       (err, result) => {
         if (err) return res.send(err);
