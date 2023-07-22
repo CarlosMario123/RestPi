@@ -13,6 +13,21 @@ routesProducto.get("/", (req, res) => {
   });
 });
 
+routesProducto.get("/name/:id", (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+    conn.query(
+      "SELECT Nombre,Kilos FROM Producto WHERE id_Producto  = ?",
+      [req.params.id],
+      (err, rows) => {
+        if (err) return res.send(err);
+        res.json(rows);
+      }
+    );
+  });
+});
+
+
 routesProducto.get("/:nombre", (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
@@ -51,7 +66,7 @@ routesProducto.post("/", (req, res) => {
     const cantidadIntroducida = productoData.Cantidad_Disponible;
 
     conn.query(
-      "SELECT id_Producto, Cantidad_Disponible FROM Producto WHERE Nombre = ?",
+      "SELECT id_Producto, Cantidad_Disponible, Estado FROM Producto WHERE Nombre = ?",
       [nombreProducto],
       (err, result) => {
         if (err) return res.send(err);
@@ -72,10 +87,16 @@ routesProducto.post("/", (req, res) => {
           const idProducto = result[0].id_Producto;
           const cantidadActual = result[0].Cantidad_Disponible;
           const nuevaCantidad = cantidadActual + cantidadIntroducida;
+          let nuevoEstado = result[0].Estado;
+
+          // Verificar si la nueva cantidad es mayor a 0 para cambiar el estado a "Activo"
+          if (nuevaCantidad > 0) {
+            nuevoEstado = "Activo";
+          }
 
           conn.query(
-            "UPDATE Producto SET Cantidad_Disponible = ? WHERE id_Producto = ?",
-            [nuevaCantidad, idProducto],
+            "UPDATE Producto SET Cantidad_Disponible = ?, Estado = ? WHERE id_Producto = ?",
+            [nuevaCantidad, nuevoEstado, idProducto],
             (err, result) => {
               if (err) return res.send(err);
 
@@ -87,7 +108,6 @@ routesProducto.post("/", (req, res) => {
     );
   });
 });
-
 
 
 routesProducto.delete("/:id", (req, res) => {

@@ -70,10 +70,11 @@ routesVenta.post("/", (req, res) => {
 
         const producto = result[0];
         const cantidadDisponible = producto.Cantidad_Disponible;
+        let nuevoEstado = producto.Estado;
 
+        // Verificar si la cantidad vendida supera la cantidad disponible
         if (cantidadVendida > cantidadDisponible) {
-          // La cantidad vendida supera la cantidad disponible
-          return -1;
+          return res.status(400).json({ error: "No hay suficiente cantidad disponible para realizar la venta." });
         }
 
         // Realizar la inserción en la tabla Venta
@@ -82,8 +83,8 @@ routesVenta.post("/", (req, res) => {
 
           // Actualizar la cantidad disponible en la tabla Producto
           const nuevaCantidadDisponible = cantidadDisponible - cantidadVendida;
-          let nuevoEstado = producto.Estado;
-
+          
+          // Verificar si la nueva cantidad es menor o igual a 0 para cambiar el estado a "Inactivo"
           if (nuevaCantidadDisponible <= 0) {
             nuevoEstado = "Inactivo";
           }
@@ -102,12 +103,6 @@ routesVenta.post("/", (req, res) => {
     );
   });
 });
-
-
-
-
-
-
 
 
 routesVenta.delete("/:id", (req, res) => {
