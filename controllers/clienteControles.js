@@ -25,6 +25,21 @@ const obtenerCliente = (req, res) => {
   });
 }
 
+const infoCliente = (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+
+    conn.query(
+      "SELECT Nombre,Nombre_Tienda FROM Cliente WHERE id_Cliente = ?",
+      [req.params.id],
+      (err, rows) => {
+        if (err) return res.send(err);
+        res.json(rows);
+      }
+    );
+  });
+}
+
 const agregarCliente = (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
@@ -67,5 +82,6 @@ module.exports = {
   obtenerCliente,
   agregarCliente,
   eliminarCliente,
-  actualizarCliente
+  actualizarCliente,
+  infoCliente
 };

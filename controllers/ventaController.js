@@ -1,4 +1,3 @@
-
 const obtenerVentas = (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
@@ -8,6 +7,24 @@ const obtenerVentas = (req, res) => {
 
       res.json(rows);
     });
+  });
+};
+
+const mejorCliente = (req, res) => {
+  req.getConnection((err, conn) => {
+    if (err) return res.send(err);
+
+    conn.query(
+     `SELECT id_Cliente, SUM(Cantidad_Vendida) AS Total_Ventas
+      FROM Venta
+      GROUP BY id_Cliente
+      ORDER BY Total_Ventas DESC;`,
+      (err, rows) => {
+        if (err) return res.send(err);
+
+        res.json(rows);
+      }
+    );
   });
 };
 
@@ -135,4 +152,5 @@ module.exports = {
   agregarVenta,
   eliminarVenta,
   actualizarVenta,
+  mejorCliente,
 };

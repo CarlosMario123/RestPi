@@ -6,11 +6,14 @@ const {
   agregarCliente,
   eliminarCliente,
   actualizarCliente,
+  infoCliente,
 } = require("../controllers/clienteControles");
 
 routesCliente.get("/", obtenerClientes);
 
 routesCliente.get("/:nombre", obtenerCliente);
+
+routesCliente.get("/id/:id", infoCliente);
 
 routesCliente.post("/", agregarCliente);
 
