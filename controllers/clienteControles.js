@@ -15,7 +15,7 @@ const obtenerCliente = (req, res) => {
     if (err) return res.send(err);
 
     conn.query(
-      "SELECT id_Cliente FROM Cliente WHERE Nombre = ?",
+      "SELECT id_Cliente,Nombre,Nombre_Tienda FROM Cliente WHERE Nombre = ?",
       [req.params.nombre],
       (err, rows) => {
         if (err) return res.send(err);

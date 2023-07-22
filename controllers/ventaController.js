@@ -33,22 +33,28 @@ const productoVendido = (req, res) => {
     if (err) return res.send(err);
 
     conn.query(
-      `SELECT id_Venta,id_Cliente,Venta.id_Producto,Cantidad_Vendida,Fecha_entrega, Producto.Nombre FROM Venta join Producto WHERE YEAR(Venta.Fecha_entrega)=${req.params.year} AND MONTH(Venta.Fecha_entrega)=${req.params.month} and Venta.id_Producto = Producto.id_Producto;`,
+      `SELECT Producto.id_Producto, Producto.Nombre, SUM(Venta.Cantidad_Vendida) AS Total_Vendido
+      FROM Venta
+      JOIN Producto ON Venta.id_Producto = Producto.id_Producto
+      WHERE YEAR(Venta.Fecha_entrega) = ${req.params.year} AND MONTH(Venta.Fecha_entrega) = ${req.params.month}
+      GROUP BY Venta.id_Producto, Producto.Nombre
+      ORDER BY Total_Vendido desc limit 1;`,
       (err, rows) => {
         if (err) return res.send(err);
 
         res.json(rows);
       }
     );
+    2;
   });
-};
+} 
 
 const productoFecha = (req, res) => {
   req.getConnection((err, conn) => {
     if (err) return res.send(err);
 
     conn.query(
-      `SELECT id_Venta,id_Cliente,Venta.id_Producto,Cantidad_Vendida,Total_Vendido,Fecha_entrega, Producto.Nombre FROM Venta join Producto WHERE YEAR(Venta.Fecha_entrega)=${req.params.year} AND MONTH(Venta.Fecha_entrega)=${req.params.month} and Venta.id_Producto = Producto.id_Producto;`,
+      `SELECT id_Venta,id_Cliente,Venta.id_Producto,Venta.Cantidad_Vendida,Fecha_entrega, Producto.Nombre FROM Venta join Producto WHERE YEAR(Venta.Fecha_entrega)=${req.params.year} AND MONTH(Venta.Fecha_entrega)=${req.params.month} and Venta.id_Producto = Producto.id_Producto;`,
       (err, rows) => {
         if (err) return res.send(err);
 
