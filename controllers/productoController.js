@@ -45,21 +45,22 @@ const agregarProducto = (req, res) => {
     const productoData = req.body;
     const nombreProducto = productoData.Nombre;
     const cantidadIntroducida = productoData.Cantidad_Disponible;
+    const Producto_id = productoData.id_Producto;
 
     conn.query(
-      "SELECT id_Producto, Cantidad_Disponible, Estado FROM Producto WHERE id_Producto = ?",
-      [nombreProducto],
+      "SELECT id_Producto, Cantidad_Disponible, Estado FROM Producto WHERE id_Producto = ? ",
+      [Producto_id],
       (err, result) => {
         if (err) return res.send(err);
-
-        if (result.length === 0) {
+         console.log(result)
+        if (result.length == 0) {
           // El producto no existe en la tabla Producto, se realiza la inserción
           conn.query(
             "INSERT INTO Producto SET ?",
             [productoData],
             (err, result) => {
               if (err) return res.send(err);
-
+             
               res.json(result);
             }
           );
